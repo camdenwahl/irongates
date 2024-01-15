@@ -1,0 +1,32 @@
+<%- include('partials/header', { title: 'Manage Quests' }) %>
+<link rel='stylesheet' href='/stylesheets/style.css' />
+
+<div class="con-nav">
+    <div class="navigation">
+        <h1>Manage Quests</h1>
+        <% if (typeof message !== 'undefined') { %>
+            <p class="errorMessage"><%= message %></p>
+        <% } %>
+        <ul>
+            <% quests.forEach(quest => { %>
+                <li>
+                    <h3><%= quest.quest_name %> (Created by: <%= quest.creator.username %>)</h3>
+                    <p>Status: <%= quest.status %></p>
+                    <p>Description: <%- quest.description %></p>
+                    <p>Rewards: <%= quest.rewards.join(", ") %></p>
+                    <!-- Quest Update Form -->
+                    <form action="/admin/quests/<%= quest._id %>/updateStatus" method="POST">
+                        <select name="newStatus">
+                            <option value="Pending" <%= quest.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                            <option value="In Progress" <%= quest.status === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+                            <option value="Completed" <%= quest.status === 'Completed' ? 'selected' : '' %>>Completed</option>
+                            <!-- Add other statuses as needed -->
+                        </select>
+                        <input type="submit" value="Update Status">
+                    </form>
+                </li>
+            <% }) %>
+        </ul>
+        <a href="/admin/dashboard">Back to Dashboard</a>
+    </div>
+</div>

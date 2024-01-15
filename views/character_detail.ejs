@@ -1,0 +1,80 @@
+<%- include('partials/header', { title: 'Home Page' }) %>
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<link rel='stylesheet' href='/stylesheets/characterdetail.css' />
+
+<div class = "con-nav">
+    <div class = "navigation">
+        <h1><a href="/userlist/" class = "returnButton">Return</a></h1>
+        <%if (typeof message !== 'undefined') { %>
+            <p class = "errorMessage"><%=message%></p>
+        <% } %>
+        <div id="regularInformation">
+            <p>Character Owner: <%= owner.username %></p>
+            <p>Character Name: <%= character.name %></p>
+    
+            <!-- Added fields -->
+            <p>Gender: <%= character.gender || 'Not specified' %></p>
+            <p>Age: <%= character.age || 'Not specified' %></p>
+            <p>Affiliation: <%= character.affiliation || 'Not specified' %></p>
+            <p>Race: <%= character.race ? character.race.name : 'Not specified' %></p>
+            <p>Privacy Status: <%= character.isPrivate ? 'Private' : 'Public' %></p>
+    
+            <% if (character.image && character.image.data) { %>
+                <img src="data:<%=character.image.contentType%>;base64, 
+                     <%=character.image.data.toString('base64')%>" alt="Character Image" id = "charDetailImage">
+            <% } %>
+    
+            <!-- Skills -->
+            <p>Skills:</p>
+            <ul>
+                <% character.skills.forEach(skillObj => { %>
+                    <% if (skillObj.skill && skillObj.skill.skill_name) { %>
+                        <li><%= skillObj.skill.skill_name %>: <%= skillObj.proficiencyLevel %></li>
+                    <% } else { %>
+                        <li>Unknown Skill: <%= skillObj.proficiencyLevel %></li>
+                    <% } %>
+                <% }); %>
+            </ul>
+            
+            
+            <p>Skill Points: <%= character.skillPoints %></p>
+            <p>Biography: <%- character.biography %></p>
+        </div>
+        <div id = "charDetailContainer">
+            <% console.log("Owner ID: " + owner._id); %>
+            <% console.log("User ID: " + req.user._id); %>
+
+            <% if (owner && owner._id.equals(req.user._id)) { %>
+                <form action="/character/<%= character._id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this character?');">
+                  <input type="submit" value="Delete Character" id = "deleteChar">
+                </form>
+             
+
+              <% character.skills.forEach(skill => { %>
+                <% if (character.characterStatus === "Approved") { %>
+                    <div class="skill">
+                        <span><%= skill.skill.skill_name %> (Current Proficiency: <%= skill.proficiencyLevel %>)</span>
+                        <form action="/<%= character._id %>/upgrade-skill" method="POST">
+                            <input type="hidden" name="skillId" value="<%= skill.skill._id %>">
+                            <input type="number" min="0" value="" id="new_proficiency_<%= skill.skill._id %>" name="newProficiency" required class="charDetail">
+    
+                            <% 
+                            let currentDescription = 'Description not available';
+                            skill.skill.proficiencyDescriptions.forEach(desc => {
+                                if(skill.proficiencyLevel >= desc.levelRange.min && skill.proficiencyLevel <= desc.levelRange.max) {
+                                    currentDescription = desc.description;
+                                }
+                            });
+                            %>
+                            <p><%= currentDescription %></p>
+    
+                            <input type="submit" value="Upgrade" class="charDetail">
+                        </form>
+                    </div>
+                <% } %>
+            <% }); %>
+            <% } %>
+        </div>
+ 
+        </div>
+    </div>

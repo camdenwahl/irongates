@@ -1,0 +1,40 @@
+<%- include('partials/header', { title: 'Manage Characters' }) %>
+<link rel='stylesheet' href='/stylesheets/style.css' />
+
+<div class = "con-nav">
+    <div class = "navigation">
+        <h1>Manage Characters</h1>
+        <% if (typeof message !== 'undefined') { %>
+            <p class="errorMessage"><%= message %></p>
+        <% } %>
+        <ul>
+            <% characters.forEach(character => { %>
+                <li>
+                    <%if (character.characterStatus !== 'Approved') {%>
+                        <h3><%= character.name %> (Owned by: <%= character.owner.username %>)</h3>
+                        <p>Status: <%= character.characterStatus %></p>
+                        <p>Skills:</p>
+                        <ul>
+                            <% character.skills.forEach(skillObj => { %>
+                                <li><%= skillObj.skill.skill_name %>: <%= skillObj.proficiencyLevel %></li>
+                            <% }) %>
+                        </ul>
+                        <p>Skill Points: <%= character.skillPoints %></p>
+                        <p>Biography: <%- character.biography %></p>
+                        <!-- Status Update Form -->
+                        <form action="/admin/characters/<%= character._id %>/updateStatus" method="POST">
+                            <select name="newStatus">
+                                <option value="Pending" <%= character.characterStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                <option value="Approved" <%= character.characterStatus === 'Approved' ? 'selected' : '' %>>Approved</option>
+                                <option value="Rejected" <%= character.characterStatus === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+                            </select>
+                            <input type="submit" value="Update Status">
+                        </form>
+                    </li>
+                    <%}%>
+
+            <% }) %>
+        </ul>
+        <a href="/admin">Back to Dashboard</a>
+    </div>
+</div>

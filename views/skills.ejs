@@ -1,0 +1,52 @@
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<link rel='stylesheet' href='/stylesheets/skills.css' />
+<%- include('partials/header', { title: 'Home Page' }) %>
+<div class = "con-nav">
+    <div class = "navigation">
+        <div id = "filterDiv">
+            <label for="characterSelect">Select a Character:</label>
+            <select name="characterSelect" id="characterSelect" onchange = "updateSkillList()">
+                <% characters.forEach(character => { %>
+                <% if (character.characterStatus === 'Approved') {%>
+                    <option value = "<%=character._id%>"><%=character.name%></option>                
+                    <%}%>
+                <%});%>
+            </select>
+            <label for="categorySelect">Select Skill Category:</label>
+            <select name="categorySelect" id="categorySelect" onchange="updateSkillList()">
+                <option value="all">All Categories</option>
+                <%
+                categories.forEach(category => { %>
+                    <option value="<%= category %>"><%= category %></option>
+                <% }); %>
+            </select>
+        </div>
+
+        <ul id = "skillList">
+        </ul>
+    </div>
+</div>
+
+<script>
+    var characters = <%- JSON.stringify(characters) %>;
+    var allSkills = <%- JSON.stringify(skill_list) %>;
+
+    function updateSkillList(){
+        var selectedCharacterId = document.getElementById('characterSelect').value;
+        var selectedCharacter = characters.find(character => character._id === selectedCharacterId);
+        var selectedCategory = document.getElementById('categorySelect').value;
+
+
+        var skillListHTML = '';
+        allSkills.forEach(skill => {
+            var skillNotPossessed = !selectedCharacter.skills.some(characterSkill => characterSkill.skill === skill._id) 
+            var skillInCategory = selectedCategory === 'all' || skill.category === selectedCategory;
+            if (skillNotPossessed && skillInCategory) {
+                skillListHTML += `<li class = "skillListButton"><a href = "/skills/${skill._id}?characterId=${selectedCharacterId}/">${skill.skill_name}</a></li>`;                
+            }
+
+        });
+        document.getElementById('skillList').innerHTML = skillListHTML;
+    }
+    updateSkillList();
+</script>

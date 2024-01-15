@@ -1,0 +1,15 @@
+<%- include('partials/header', { title: 'Home Page' }) %>
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<link rel='stylesheet' href='/stylesheets/questlist.css' />
+
+<div class ="con-nav">
+    <div class = "navigation">
+        <h2><a href="/quests/create-quest">Create a Quest</a></h2>
+        <h3>Quest List:</h3>
+        <ul>
+            <% quest_list.forEach(quest => { %>
+                <li><a href="/quests/<%=quest._id%>/questdetail"><%= quest.quest_name %></a></li>
+            <% }); %>
+        </ul>
+    </div>
+</div>

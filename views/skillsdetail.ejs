@@ -1,0 +1,61 @@
+<%- include('partials/header', { title: 'Home Page' }) %>
+<link rel='stylesheet' href='/stylesheets/skills.css' />
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<link rel='stylesheet' href='/stylesheets/skilldetail.css' />
+
+<div class = "con-nav">
+    <div class = "navigation">
+        <h1><a href="/skill-list/" class = "returnButton">Return.</a></h1>
+        <h2 id = "skillDetail">Skill Details:</h2>
+        <div id = "skillInformation">
+            <p>Skill Name: <%= skills.skill_name %></p>
+            <p><%= skills.description %></p>
+            <p>Max Proficiency: <%= skills.proficiency %></p>
+            <p>Cost: <%= skills.skillCost%> per level.</p>
+            <div id="prerequisiteSkills">
+                <p>Prerequisite Skill Requirements:</p>
+                <% if (prerequisiteSkills.length > 0) { %>
+                    <ul>
+                        <% prerequisiteSkills.forEach(prereq => { %>
+                            <li><%= prereq.name %> (Proficiency: <%= prereq.proficiency %>)</li>
+                        <% }); %>
+                    </ul>
+                <% } else { %>
+                    <p>No prerequisite skills required.</p>
+                <% } %>
+            </div>
+            <p>Category: <%=skills.category%></p>
+                    <!-- In your skill detail page -->
+            <form action="/character/<%= characterId %>/addSkill/<%= skills._id %>" method="post">
+                <p>Select proficiency level to add:</p>
+                <input type="number" name="proficiencyLevel" min="1" max="<%= skills.proficiency %>" required>
+                <button type="submit">Add Skill</button>
+            </form>
+    
+            <% skills.proficiencyDescriptions.forEach((desc, index) => { %>
+                <div id="profDesc<%= index %>" class="proficiency-description" data-min="<%= desc.levelRange.min %>" data-max="<%= desc.levelRange.max %>" style="display: none;">
+                    <p><strong>Level <%= desc.levelRange.min %> - <%= desc.levelRange.max %> :</strong> <%= desc.description %></p>
+                </div>
+            <% }); %>
+        </div>
+        
+        <script>
+            function updateProficiencyDescription() {
+                const selectedLevel = parseInt(document.querySelector('[name="proficiencyLevel"]').value) || 0;
+                document.querySelectorAll('.proficiency-description').forEach(descElem => {
+                    const minLevel = parseInt(descElem.getAttribute('data-min'));
+                    const maxLevel = parseInt(descElem.getAttribute('data-max'));
+                    if(selectedLevel >= minLevel && selectedLevel <= maxLevel) {
+                        descElem.style.display = 'block';
+                    } else {
+                        descElem.style.display = 'none';
+                    }
+                });
+            }
+        
+            document.querySelector('[name="proficiencyLevel"]').addEventListener('input', updateProficiencyDescription);
+        </script>
+        
+        
+    </div>    
+</div>

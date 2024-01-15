@@ -1,0 +1,23 @@
+
+<link rel='stylesheet' href='/stylesheets/style.css' />
+
+<h1>Create New Race</h1>
+
+<form action="/admin/race/create" method="post">
+    <div>
+        <label for="name">Race Name:</label>
+        <input type="text" id="name" name="name" required>
+    </div>
+    
+    <h3>Forced Skills</h3>
+    <% skills.forEach(function(skill) { %>
+        <div>
+            <input type="checkbox" id="skill_<%= skill._id %>" name="forcedSkills" value="<%= skill._id %>">
+            <label for="skill_<%= skill._id %>"><%= skill.skill_name %></label>
+            <input type="number" name="proficiency_<%= skill._id %>" min="1" max="<%= skill.maxProficiency %>" placeholder="Proficiency Level">
+        </div>
+    <% }); %>
+
+    <button type="submit">Create Race</button>
+</form>
+

@@ -1,0 +1,82 @@
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<link rel='stylesheet' href='/stylesheets/indexhome.css' />
+<%- include('partials/header', { title: 'Home Page' }) %>
+<div id = "main-container">
+    <% if (user) { %>
+        <%- include('partials/footer', { title: 'Home Page' }) %>
+        <% if (isAdmin) { %>
+            <div class = "actionDiv">
+                <h2><a href="/admin">Go to admin dashboard.</a></h2>
+            </div>
+        <% } %>
+    
+        <div id ="character-container">
+            <button id ="next-character">Next Character</button>
+            <%characters.forEach((character, index) => { %>
+                <div class="character-info" <% if(index !== 0) { %> style="display: none;" <% } %> id="character-<%= index %>">
+                    <h2><%= character.name %></h2>
+                    <p>Status: <%= character.characterStatus %></p>
+                    <img src="<%= character.imageBase64 %>" alt="<%= character.name %> Image">
+                    <p>Biography: <%- character.biography %></p>
+            
+                    <!-- Add additional fields here -->
+                    <p>Gender: <%= character.gender || 'Not specified' %></p>
+                    <p>Age: <%= character.age || 'Not specified' %></p>
+                    <p>Affiliation: <%= character.affiliation || 'Not specified' %></p>
+                    <p>Race: <%= character.race.name || 'Not specified' %></p>
+                    <p>Skill Points: <%= character.skillPoints %></p>
+                    <p>Skills: 
+                        <ul>
+                            <% character.skills.forEach(skillObj => { %>
+                                <% if (skillObj.skill && skillObj.skill.skill_name) { %>
+                                    <li><%= skillObj.skill.skill_name %>: <%= skillObj.proficiencyLevel %></li>
+                                <% } else { %>
+                                    <li>Unknown Skill: <%= skillObj.proficiencyLevel %></li>
+                                <% } %>
+                            <% }); %>
+                        </ul>
+                    </p>
+                    <p>Privacy Status: <%= character.isPrivate ? 'Private' : 'Public' %></p>
+            
+                    <!-- Existing Edit Link and Privacy Toggle -->
+                    <a href="/<%= character._id %>/character_detail" class="editButton">Edit Character</a>
+                    <% if (character.isOwner && character.characterStatus === "Approved") {%>
+                        <form action="/togglePrivacy/<%=character._id%>" method="post" id="publicForm">
+                            <button type="submit" id="privateButton">
+                                <%=character.isPrivate ? 'Make Public' : 'Make Private' %>
+                            </button>
+                        </form>
+                    <%}%>
+                </div>
+            <%});%>
+            
+
+<% } else { %>
+    <div id = "containerLogin">
+        <div id = "Login-Div">
+            <h1>Log In</h1>
+            <form action="/log-in" method = "POST">
+                <label for="username">Username</label>
+                <input type="text" name="username" placeholder="username" autocomplete="off" required>
+                <label for="password">Password</label>
+                <input type="password" name = "password" required>
+                <button>Log In</button>
+            </form>
+            <h2 id = "signUp"><a href="/sign-up">Create an account.</a></h2>
+        </div>
+    </div>
+<% } %>
+
+<script>
+    let currentCharacterIndex = 0;
+    const characters = document.getElementsByClassName('character-info');
+    const totalCharacters = characters.length;
+
+    document.getElementById('next-character').addEventListener('click', function() {
+        characters[currentCharacterIndex].style.display = 'none';
+        currentCharacterIndex = (currentCharacterIndex + 1) % totalCharacters;
+        characters[currentCharacterIndex].style.display = 'block';
+    });
+</script>
+
+

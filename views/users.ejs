@@ -1,0 +1,14 @@
+<%- include('partials/header', { title: 'Home Page' }) %>
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<link rel='stylesheet' href='/stylesheets/users.css' />
+
+<div class = "con-nav">
+    <div class = "navigation">
+    <h2 class = "labelHeader">User List:</h2>
+    <ul class = "userList">
+        <% user_list.forEach(user => { %>
+            <li><a href="/<%= user._id %>/characters"><%= user.username %></a></li>
+        <% }); %>
+    </ul>
+    </div>
+</div>

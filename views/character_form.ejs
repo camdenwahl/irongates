@@ -1,0 +1,250 @@
+<%- include('partials/header', { title: 'Home Page' }) %>
+<!-- <link rel='stylesheet' href='/stylesheets/style.css' /> -->
+<link rel='stylesheet' href='/stylesheets/characterform.css' />
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<div class = "navigation">
+    <h1><%=title%></h1>
+    <% if (errors && errors.length > 0) { %>
+        <div class="errorMessage">
+            <% errors.forEach(function(error) { %>
+                <p class="error"><%= error.msg %></p>
+            <% }) %>
+        </div>
+    <% } %>
+    
+    <%const {skillsByCategory, skills } = data;%>
+    
+    <form method = "POST" action="/character_form" enctype="multipart/form-data" id = "characterForm">
+        <div class = "divForm">
+            <label for="name">Character Name:</label>
+            <input type="text" name="name" required="true">
+        </div>
+
+        <div class = "divForm">
+            <input type="file" name="characterImage" accept="image/*" id = "selectImage">
+        </div>
+
+        <label for="gender">Gender:</label>
+        <select name="gender" id="gender">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+            <!-- Add more options as needed -->
+        </select>
+
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" min="0">
+
+        <label for="affiliation">Affiliation:</label>
+        <select name="affiliation" id="affiliation" required>
+            <option value="">Select Affiliation</option>
+            <option value="Pirate">Pirate</option>
+            <option value="Independent">Independent</option>
+            <option value="Marine">Marine</option>
+            <option value="Revolutionary">Revolutionary</option>
+            <option value="Bounty Hunter">Bounty Hunter</option>
+        </select>
+
+
+
+        <label for="raceSelector">Select Race:</label>
+        <select name="race" id="raceSelector" required>
+            <option value="" disabled selected>Select a Race</option>
+            <% races.forEach(function(race) { %>
+                <option value="<%= race._id %>"><%= race.name %></option>
+            <% }); %>
+        </select>
+
+
+        <label for="biography">Backstory:</label>
+        <div id = "biography">            
+        </div>
+        <input type="hidden" name="biography" id="hiddenBiography">
+
+        <label for="categorySelector">Select Skill Tree:</label>
+        <select id="categorySelector">
+            <option value="" disabled selected>Select a Skill Tree</option>
+            <% Object.keys(skillsByCategory).forEach(function(category) { %>
+                <option value="<%= category %>"><%= category %></option>
+            <% }); %>
+        </select>
+        
+        <div id = "skillTreeContainer">         
+        </div>
+        <button type="submit" id = "submitButton">Submit</button>
+    </form>
+        <!-- Add this in the <head> or just before your scripts in the <body> -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $('#raceSelector').change(function() {
+        const raceId = $(this).val();
+        $.ajax({
+            url: `/api/races/${raceId}/forcedSkills`,
+            type: 'GET',
+            success: function(forcedSkills) {
+                updateSkillSelections(forcedSkills);
+            }
+        });
+        });
+
+        function updateSkillSelections(forcedSkills) {
+    forcedSkills.forEach(fs => {
+        // Auto-select the category that contains the forced skill
+        const categoryOption = $(`#categorySelector option[value="${fs.skill.category}"]`);
+        categoryOption.prop('selected', true);
+
+        // Auto-select and disable the checkbox for the forced skill
+        const skillCheckbox = $(`#skill_${fs.skill._id}`);
+        skillCheckbox.prop('checked', true).prop('disabled', true);
+
+        // Add a hidden input if it doesn't exist
+        if (!skillCheckbox.next('input[type="hidden"]').length) {
+            const hiddenInput = `<input type="hidden" name="skills" value="${fs.skill._id}">`;
+            skillCheckbox.after(hiddenInput);
+        }
+
+        // Set minimum proficiency level (without disabling the input)
+        $(`#proficiency_${fs.skill._id}`).val(fs.proficiencyLevel).attr('min', fs.proficiencyLevel);
+
+        // Trigger the category change logic
+        handleCategoryChange(fs.skill.category);
+    });
+}
+
+
+
+
+
+        </script>
+    <script>
+        var quill = new Quill('#biography', {
+            theme: 'snow'
+        });
+
+        var form = document.querySelector('form');
+        form.onsubmit = function() {
+        // Update hidden field
+        document.getElementById('hiddenBiography').value = quill.root.innerHTML;
+    };
+
+    function createSkillTree(data) {
+    const {skillsByCategory, skills } = data;
+    const container = document.getElementById("skillTreeContainer");
+
+    for (const category in skillsByCategory) {
+        let tree = document.createElement('ul');
+        tree.classList.add('skill-tree');
+        tree.setAttribute('data-category', category);
+        tree.style.display = 'none'; // Initialize as hidden
+
+        for (const skill of skillsByCategory[category]) {
+            let branch = document.createElement('li');
+            branch.classList.add("skill-branch");
+
+            let prerequisitesInfo = '';
+
+            if (skill.prerequisites && skill.prerequisites.length > 0) {
+                prerequisitesInfo = skill.prerequisites.map(prereq => {
+                    // Check if prereq.skill is defined before trying to access its properties
+                    if (prereq) {
+                        return `${prereq.skill.skill_name} (Required Proficiency: ${prereq.requiredProficiency})`;
+                    } else {
+                        return 'Unknown Prerequisite'; // Or any other placeholder text
+                    }
+                }).join(', ');
+            }
+
+            let branchHtml = `
+                <label for="skill_${skill._id}">${skill.skill_name} (Cost: ${skill.skillCost})</label>
+                <input type="checkbox" name="skills" id="skill_${skill._id}" value="${skill._id}">
+                <label for="proficiency_${skill._id}">Proficiency Level:</label>
+                <input type="number" name="proficiency_${skill._id}" id="proficiency_${skill._id}" min="1" max="${skill.proficiency}">
+            `;
+
+            if (prerequisitesInfo) {
+                branchHtml += `<div class="prerequisite-indicator">Prerequisites: ${prerequisitesInfo}</div>`;
+            }
+
+            let proficiencyDescriptionsHtml = '<div class="skill-proficiency-descriptions">';
+                skill.proficiencyDescriptions.forEach((desc, index) => {
+                    proficiencyDescriptionsHtml += `
+                        <div id="profDesc_${skill._id}_${index}" class="proficiency-description" data-min="${desc.levelRange.min}" data-max="${desc.levelRange.max}" style="display: none;">
+                            <p><strong>Level ${desc.levelRange.min} - ${desc.levelRange.max}:</strong> ${desc.description}</p>
+                        </div>
+                    `;
+                });
+                proficiencyDescriptionsHtml += '</div>';
+
+                branch.innerHTML = branchHtml + proficiencyDescriptionsHtml;
+                tree.appendChild(branch);
+
+                // Add event listener to proficiency level input
+                const proficiencyInput = branch.querySelector(`#proficiency_${skill._id}`);
+                proficiencyInput.addEventListener('input', function() {
+                    updateProficiencyDescription(skill._id, parseInt(this.value));
+                });
+
+            tree.appendChild(branch);
+        }
+
+        container.appendChild(tree);
+    }
+
+    function updateProficiencyDescription(skillId, selectedLevel) {
+        document.querySelectorAll(`.skill-proficiency-descriptions .proficiency-description`).forEach(descElem => {
+            const skillDescId = descElem.id.split('_')[1];
+            if (skillDescId === skillId) {
+                const minLevel = parseInt(descElem.getAttribute('data-min'));
+                const maxLevel = parseInt(descElem.getAttribute('data-max'));
+                if(selectedLevel >= minLevel && selectedLevel <= maxLevel) {
+                    descElem.style.display = 'block';
+                } else {
+                    descElem.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    
+
+    // Trigger the change event to display the tree of the initially selected category
+    const categorySelector = document.getElementById('categorySelector');
+    if (categorySelector.options[categorySelector.selectedIndex]) {
+        categorySelector.dispatchEvent(new Event('change'));
+    }
+}
+
+            document.getElementById('categorySelector').addEventListener('change', function(event) {
+            const selectedCategory = event.target.value;
+            const trees = document.querySelectorAll('.skill-tree');
+            trees.forEach(tree => {
+                if (tree.getAttribute('data-category') === selectedCategory) {
+                    tree.style.display = 'block';
+                } else {
+                    tree.style.display = 'none';
+                }
+            });
+        });
+        
+        createSkillTree(<%- JSON.stringify(data) %>);
+
+        function handleCategoryChange(category) {
+    const trees = document.querySelectorAll('.skill-tree');
+    trees.forEach(tree => {
+        if (tree.getAttribute('data-category') === category) {
+            tree.style.display = 'block';
+        } else {
+            tree.style.display = 'none';
+        }
+    });
+}
+
+    document.getElementById('categorySelector').addEventListener('change', function(event) {
+        handleCategoryChange(event.target.value);
+    });
+
+    </script>
+
+</div>

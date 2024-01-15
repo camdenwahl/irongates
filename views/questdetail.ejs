@@ -1,0 +1,73 @@
+<%- include('partials/header', { title: 'Home Page' }) %>
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<link rel='stylesheet' href='/stylesheets/questdetail.css' />
+
+<div class = "con-nav">
+    <div class = "navigation">
+        <h1><a href="/questlist/" class = "returnButton">Return.</a></h1>
+        <% if (user._id.toString() === quests.creator.toString()) { %>
+            <h2>Manage Quest</h2>
+        
+            <h3>Sign-up Requests:</h3>
+            <% quests.signUpRequests.forEach(request => { %>
+                <div>
+                    <%= request.name %> 
+                    <% if (!quests.participants.some(p => p._id.equals(request._id))) { %>
+                        <a href="/quests/<%= quests._id %>/accept/<%= request._id %>">Accept</a>
+                    <% } %>
+                    <a href="/quests/<%= quests._id %>/reject/<%= request._id %>">Reject</a>
+                </div>
+            <% }); %>
+        
+            <% if (!quests.adminConfirmed && quests.status !== 'Pending') { %>
+                <h3>Update Quest Status:</h3>
+                <form action="/quests/<%= quests._id %>/updateStatus" method="post">
+                    <select name="newStatus">
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <!-- Other statuses as needed -->
+                    </select>
+                    <button type="submit">Update Status</button>
+                </form>
+            <% } %>
+        <% } %>
+
+        <% if (user.isAdmin && quests.status === 'Completed' && !quests.adminConfirmation) { %>
+            <h2>Admin Confirmation</h2>
+            <form action="/quests/<%= quests._id %>/adminConfirm" method="post">
+                <button type="submit">Confirm Completion</button>
+            </form>
+        <% } %>
+        
+        
+        <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+            <p class="errorMessage"><%= errorMessage %></p>
+        <% } %>
+        <div id = "regularInformation">
+            <p>Quest Name: <%= quests.quest_name %></p>
+            <p>Completion Requirements: <%= quests.requirements.join(", ") %></p>
+            <p>Rewards: <%= quests.rewards.join(", ") %></p>
+            <p>Skill Point Reward: <%=quests.skillPointsReward%></p>
+            <p>Quest Status: <%= quests.status %></p>
+            <ul>Participants: <% quests.participants.forEach(participant => {%>
+                <li><%=participant.name%></li>
+            <%}) %></ul>  
+        </div>
+        <p>Description: <%- quests.description %></p>
+
+        <% if (quests.status === 'Pending') { %>
+            <form action="/quests/<%= quests._id %>/signup" method="post" id = "signUp-Form">
+                <!-- Dropdown to select a character -->
+                <select name="characterId" required>
+                    <% user_characters.forEach(character => { %>
+                        <%if (character.characterStatus === "Approved") {%>
+                            <option value="<%= character._id %>"><%= character.name %></option>
+                        <%}%>
+                    <% }); %>
+                </select>
+                <button type="submit" class="signup-btn">Sign Up</button>
+            </form>
+        <% } %>
+    </div>
+    
+</div>

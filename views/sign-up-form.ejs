@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Piece: Legacies</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/indexhome.css' />
+    <link rel='stylesheet' href='/stylesheets/landingpage.css' />
+
+
+</head>
+<body>
+    <div id = "landingNavigation">
+        <div id = "imgContainer">
+            <a href="/"><img src="/images/irongateslogo.png" alt=""></a>
+        </div>
+        <h1 class = "navButton"><a href="/log-in">Log in</a></h1>
+    </div>
+<div id = "main-container">
+    <div id = "containerLogin">
+        <div id = "SignUp-Div">
+            <h1>Sign Up</h1>
+            <% if (errorMessage) { %>
+                <p><%= errorMessage %></p>
+            <% } %>
+            <!-- Rest of your sign-up form here -->            
+            <form action="/sign-up" method = "POST" id = "registrationForm">
+                <label for="email">Email</label>
+                <input type="email" name="email" autocomplete="off" required>
+                <label for="username">Username</label>
+                <input type="text" name="username" placeholder="username" autocomplete="off" required>
+                <label for="password">Password</label>
+                <input type="password" name = "password" id = "password" placeholder="Password" required>
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required>
+                <button>Create Account</button>
+            </form>
+            <p id="passwordMatchMessage"></p>
+            <h2 id = "logIn"><a href="/log-in">Already signed up?</a></h2>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('registrationForm').addEventListener('submit', function(event) {
+        var password = document.getElementById('password').value;
+        var confirmPassword = document.getElementById('confirmPassword').value;
+        var message = document.getElementById('passwordMatchMessage');
+
+        if (password !== confirmPassword) {
+            message.textContent = 'Passwords do not match';
+            event.preventDefault(); // Prevent form submission
+        } else {
+            message.textContent = '';
+        }
+    });
+</script>
+
+
+</body>
+</html>

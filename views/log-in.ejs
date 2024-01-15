@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Piece: Legacies</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/indexhome.css' />
+    <link rel='stylesheet' href='/stylesheets/landingpage.css' />
+</head>
+<body>
+    <div id = "landingNavigation">
+        <div id = "imgContainer">
+            <a href="/"><img src="/images/irongateslogo.png" alt=""></a>
+        </div>
+        <h1 class = "navButton"><a href="/log-in">Log in</a></h1>
+    </div>
+        <div id = "main-container">
+            <div id = "containerLogin">
+                <div id = "Login-Div">
+                    <h1>Log In</h1>
+                    <form action="/log-in" method = "POST">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" placeholder="username" autocomplete="off" required>
+                        <label for="password">Password</label>
+                        <input type="password" name = "password" required>
+                        <button>Log In</button>
+                    </form>
+                    <a href="/forgot-password">Forgot Password?</a>
+                    <h2 id = "signUp"><a href="/sign-up">Create an account.</a></h2>
+                </div>
+            </div>
+        </div>
+</body>
+</html>

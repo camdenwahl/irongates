@@ -1,0 +1,46 @@
+<%- include('partials/header', { title: 'Home Page' }) %>
+<link rel="stylesheet" href="/stylesheets/questform.css">
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<div id = "questForm">
+    <form action="/quests/create-quest" method="POST">
+        <label for="quest_name">Quest Name:</label>
+        <input type="text" id="quest_name" name="quest_name" maxlength="50"required>
+    
+        <label for="quest">Description</label>
+        <div id="quest">
+
+        </div>
+        <input type="hidden" name="description" id="hiddenQuest">
+    
+        <label for="requirements">Requirements (Comma Separated)</label>
+        <input type="text" id="requirements" name="requirements">
+    
+        <label for="rewards">Rewards (Comma Separated)</label>
+        <input type="text" id="rewards" name="rewards">
+        
+        <label for="numReward">Number of Skill Points Upon Completion:</label>
+        <input type="number" id="numReward" name="numReward" required min = "0" max = "15">
+    
+        <label for="participants">Participants:</label>
+        <select name="participants" id="participants" multiple>
+            <% characters.forEach(character => { %>
+            <option value="<%=character._id%>"><%=character.name%></option><%});%>
+        </select>
+        <input type="submit" value="Create Quest">
+        <% if (typeof message !== 'undefined') {%>
+            <h2><%=message%></h2>
+        <%}%>
+    </form>
+</div>
+<script>
+            var quill = new Quill('#quest', {
+            theme: 'snow'
+        });
+
+        var form = document.querySelector('form');
+        form.onsubmit = function() {
+        // Update hidden field
+        document.getElementById('hiddenQuest').value = quill.root.innerHTML;
+    };
+</script>

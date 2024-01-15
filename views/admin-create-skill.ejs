@@ -1,0 +1,101 @@
+<%- include('partials/header', { title: 'Create New Skill' }) %>
+<link rel="stylesheet" href="/stylesheets/admin.css">
+<!-- Select2 CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+<!-- ... other head elements ... -->
+
+<form method="POST" action="/admin/create-skill">
+    <label for="skill_name">Skill Name:</label>
+    <input type="text" id="skill_name" name="skill_name" required>
+
+    <label for="description">Description:</label>
+    <textarea id="description" name="description"></textarea>
+
+    <div id = "proficiencyDescriptions">
+        <div class = "proficiencyDescription">
+            <label>Level Range:</label>
+            <input type="number" name = "minLevel[]" placeholder="Min Level">
+            <input type="number" name = "maxLevel[]" placeholder="Max Level">
+            
+            <label>Description:</label>
+            <textarea name="levelDescriptions[]"  cols="30" rows="10"></textarea>
+        </div>
+    </div>
+    <button type="button" onclick="addProficiencyDescription()">Add Another Level Description</button>
+    <label for="prerequisites">Prerequisites:</label>
+    <select id="prerequisites" name="prerequisites" multiple>
+        <% allSkills.forEach(function(skill) { %>
+            <option value="<%= skill._id %>"><%= skill.skill_name %></option>
+        <% }); %>
+    </select>
+    <div id="prerequisitesProficiencyLevels">
+        <!-- Dynamic proficiency level inputs will be added here -->
+    </div>
+    
+
+
+    <label for="category">Category:</label>
+    <select name="category" id="category">
+        <% categories.forEach(function(category) { %>
+            <option value="<%= category %>"><%= category %></option>
+        <% }); %>
+    </select>
+
+    <label for="defaultProficiency">Default Proficiency Level:</label>
+    <input type="number" id="defaultProficiency" name="defaultProficiency" min="0" value="0">
+    
+    <label for="skillCost">Skill Cost:</label>
+    <input type="number" id="skillCost" name="skillCost" min="0" value="0">
+    
+    <button type="submit">Create Skill</button>
+</form>
+<!-- jQuery (Select2 depends on it) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<!-- ... other scripts ... -->
+
+<script>
+    $(document).ready(function() {
+        $('#prerequisites').select2({
+            placeholder: "Select prerequisites",
+            allowClear: true
+        }).on("select2:select select2:unselect", function(e) {
+            updateProficiencyLevelInputs();
+        });
+    });
+
+    function updateProficiencyLevelInputs() {
+        const selectedPrerequisites = $('#prerequisites').val();
+        const container = document.getElementById("prerequisitesProficiencyLevels");
+        container.innerHTML = ""; // Clear current inputs
+
+        selectedPrerequisites.forEach(skillId => {
+            const newInput = document.createElement("div");
+            newInput.innerHTML = `
+                <label for="proficiency_${skillId}">Required Proficiency for ${skillId}:</label>
+                <input type="number" name="requiredProficiency[${skillId}]" id="proficiency_${skillId}" min="1" max="20" value="1">
+            `;
+            container.appendChild(newInput);
+        });
+    }
+
+    function addProficiencyDescription() {
+        const container = document.getElementById("proficiencyDescriptions");
+        const newDesc = document.createElement("div");
+        newDesc.classList.add("proficiencyDescription");
+        newDesc.innerHTML = `
+        <label>Level Range:</label>
+            <input type="number" name="minLevel[]" placeholder="Min Level">
+            <input type="number" name="maxLevel[]" placeholder="Max Level">
+
+            <label>Description:</label>
+            <textarea name="levelDescriptions[]"></textarea>
+        `;
+        container.appendChild(newDesc);
+    }
+</script>
+

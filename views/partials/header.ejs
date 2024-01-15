@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title><%=title%></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+<body>
+    <div id = "container">
+        <% if (user) {%>
+            <div id = "main">
+                <div>
+                    <h1>Welcome Back <%= user.username%></h1>
+                    <a href="/log-out">Log out</a>
+                </div>
+                <h2><a href="/home">Home</a></h2>
+                <h2><a href="/userlist">Users</a></h2>
+                <h2><a href="/questlist">Quests</a></h2>
+                <h2><a href="/skill-list">Skills</a></h2>
+                <!-- <ul>
+                    <li>Number of Registerd Users: <%=user_count%></li>
+                    <li>Number of Quests: <%=quest_count%></li>
+                    <li>Total Available Skills: <%=skill_count%></li>
+                    <li>Total Created Characters: <%=character_count%></li>
+                </ul> -->
+            </div>
+            <% } else { %>
+            <!-- <h1>Log In</h1>
+            <form action="/log-in" method = "POST">
+                <label for="email">Email</label>
+                <input type="email" name="email">
+                <label for="username">Username</label>
+                <input type="text" name="username" placeholder="username">
+                <label for="password">Password</label>
+                <input type="password" name = "password">
+                <button>Log In</button>
+            </form> -->
+            <%}%>
+    </div>
+    
+    
+</body>
+</html>
